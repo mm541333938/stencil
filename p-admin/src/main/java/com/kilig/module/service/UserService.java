@@ -44,4 +44,11 @@ public interface UserService {
      */
     UserDetails loadUserByUsername(String username);
 
+    /**
+     * 修改当前用户信息
+     *
+     * @param user
+     * @return
+     */
+    int updateInfo(Integer id, User user);
 }

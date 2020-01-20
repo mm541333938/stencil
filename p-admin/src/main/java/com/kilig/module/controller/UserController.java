@@ -2,6 +2,7 @@ package com.kilig.module.controller;
 
 import com.kilig.module.common.api.CommonResult;
 import com.kilig.module.dao.UserRoleDao;
+import com.kilig.module.dto.UpdatePasswordParam;
 import com.kilig.module.dto.UserRegisterParam;
 import com.kilig.module.entity.Role;
 import com.kilig.module.entity.User;
@@ -68,6 +69,7 @@ public class UserController {
     @GetMapping("/login")
     public CommonResult login(@RequestParam("username") String username,
                               @RequestParam("password") String password) {
+        //todo
         String token = userService.login(username, password);
         if (token == null) return CommonResult.validateFailed("用户名或密码错误");
         Map<String, Object> map = new HashMap<>();
@@ -92,7 +94,7 @@ public class UserController {
         List<Role> roleList = userRoleDao.getRolesByUserId(user.getId());
         for (Role r : roleList) {
             if (r.getName().equals("ROLE_ADMIN")) data.put("role", "admin");
-            else data.put("role","normal");
+            else data.put("role", "normal");
         }
         //结果数据
         data.put("username", user.getUsername());
@@ -102,7 +104,20 @@ public class UserController {
 
     @ApiOperation(value = "修改密码")
     @PostMapping("/updatePassword")
-    public CommonResult updatePwd() {
-        return null;
+    public CommonResult updatePwd(@RequestBody UpdatePasswordParam updatePasswordParam) {
+        int status = userService.updatePassword(updatePasswordParam);
+        if (status > 0) return CommonResult.success(status);
+        else if (status == -1) return CommonResult.failed("提交参数不合法");
+        else if (status == -2) return CommonResult.failed("找不到该用户");
+        else if (status == -3) return CommonResult.failed("旧密码错误");
+        else return CommonResult.failed();
+    }
+
+    @ApiOperation(value = "修改当前用户信息")
+    @PostMapping("/updateInfo/{id}")
+    public CommonResult updateInfo(@PathVariable Integer id, @RequestBody User user) {
+        int count = userService.updateInfo(id, user);
+        if (count > 0) return CommonResult.success(count);
+        return CommonResult.failed();
     }
 }

@@ -1,7 +1,11 @@
 package com.kilig.module.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
+import com.kilig.module.dao.UserRoleDao;
 import com.kilig.module.dto.UpdatePasswordParam;
+import com.kilig.module.dto.UserDetailsDto;
 import com.kilig.module.dto.UserRegisterParam;
 import com.kilig.module.entity.*;
 import com.kilig.module.mapper.RoleMapper;
@@ -12,7 +16,12 @@ import com.kilig.module.util.JwtTokenUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +45,8 @@ public class UserServiceImpl implements UserService {
     private UserRoleMapper userRoleMapper;
     @Autowired
     private RoleMapper roleMapper;
-
+    @Autowired
+    private UserRoleDao userRoleDao;
 
     @Override
     public User getUserByUsername(String username) {
@@ -72,9 +82,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String login(String username, String password) {
+        String token = null;
+        //密码需要客户端加密后传递
+        try {
+            UserDetails userDetails = loadUserByUsername(username);
+            if (!passwordEncoder.matches(password, userDetails.getPassword())) {
+                throw new BadCredentialsException("密码不正确");
+            }
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            token = jwtTokenUtil.generateToken(userDetails);
+//            insertLoginLog(username);
+        } catch (AuthenticationException e) {
+            LOGGER.warn("登录异常:{}", e.getMessage());
+        }
 
-
-        return null;
+        return token;
     }
 
     @Override
@@ -83,12 +106,42 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public int updatePassword(UpdatePasswordParam updatePasswordParam) {
-        return 0;
+    public int updatePassword(UpdatePasswordParam param) {
+        if (StrUtil.isEmpty(param.getUsername()) || StrUtil.isEmpty(param.getOldPassword()) || StrUtil.isEmpty(param.getNewPassword())) {
+            return -1;
+        }
+        UserExample example = new UserExample();
+        example.createCriteria().andUsernameEqualTo(param.getUsername());
+        List<User> userList = userMapper.selectByExample(example);
+        if (CollUtil.isEmpty(userList)) return -2;
+        User user = userList.get(0);
+        if (!passwordEncoder.matches(param.getOldPassword(), user.getPassword())) return -3;
+        user.setPassword(passwordEncoder.encode(param.getNewPassword()));
+        userMapper.updateByPrimaryKey(user);
+        return 1;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) {
-        return null;
+        //获取用户信息
+        User user = getUserByUsername(username);
+        if (user != null) {
+            List<Role> roleList = getRoleList(user.getId());
+            return new UserDetailsDto(user, roleList);
+        }
+        throw new UsernameNotFoundException("用户名或密码错误");
+    }
+
+    @Override
+    public int updateInfo(Integer id, User user) {
+        user.setId(id);
+        //密码需要单独修改
+        user.setPassword(null);
+        return userMapper.updateByPrimaryKeySelective(user);
+    }
+
+
+    private List<Role> getRoleList(Integer userId) {
+        return userRoleDao.getRolesByUserId(userId);
     }
 }
