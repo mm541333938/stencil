@@ -1,7 +1,7 @@
 package com.kilig.module.component;
 
 import cn.hutool.json.JSONUtil;
-import com.macro.mall.common.api.CommonResult;
+import com.kilig.module.common.api.CommonResult;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 

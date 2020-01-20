@@ -1,6 +1,6 @@
 package com.kilig.module.component;
 
-import com.macro.mall.security.util.JwtTokenUtil;
+import com.kilig.module.util.JwtTokenUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
