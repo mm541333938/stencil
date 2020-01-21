@@ -35,6 +35,8 @@ secure:
       - /admin/login
       - /admin/register
       - /minio/upload
+      - /login
+      - /register
 
 
 logging:

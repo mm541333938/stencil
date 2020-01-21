@@ -50,6 +50,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserByUsername(String username) {
+        UserExample example = new UserExample();
+        example.createCriteria().andUsernameEqualTo(username);
+        List<User> userList = userMapper.selectByExample(example);
+        if (userList != null && userList.size() > 0) return userList.get(0);
         return null;
     }
 

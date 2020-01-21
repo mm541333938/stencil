@@ -14,15 +14,15 @@ import org.springframework.security.core.userdetails.UserDetailsService;
  */
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled=true)
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class PSecurity extends SecurityConfig {
 
     @Autowired
     private UserService userService;
 
     @Bean
-    public UserDetailsService userDetailsService(){
-        return username->userService.loadUserByUsername(username);
+    public UserDetailsService userDetailsService() {
+        return username -> userService.loadUserByUsername(username);
     }
 
 }
