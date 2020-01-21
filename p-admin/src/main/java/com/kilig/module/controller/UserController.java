@@ -66,10 +66,9 @@ public class UserController {
     }
 
     @ApiOperation(value = "用户登录")
-    @GetMapping("/login")
+    @PostMapping("/login")
     public CommonResult login(@RequestParam("username") String username,
                               @RequestParam("password") String password) {
-        //todo
         String token = userService.login(username, password);
         if (token == null) return CommonResult.validateFailed("用户名或密码错误");
         Map<String, Object> map = new HashMap<>();
