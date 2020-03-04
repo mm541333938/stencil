@@ -44,10 +44,13 @@ public class UserController {
     @ApiOperation(value = "用户注册")
     @PostMapping("/register")
     public CommonResult register(@RequestBody UserRegisterParam userRegisterParam, BindingResult result) {
+
         //执行注册方法
         User user = userService.register(userRegisterParam);
         //判断是否注册成功 null = 失败
-        if (user == null) return CommonResult.failed();
+        if (user == null) {
+            return CommonResult.failed();
+        }
         return CommonResult.success(user);
     }
 
@@ -58,8 +61,10 @@ public class UserController {
         String token = request.getHeader(tokenHeader);
         //刷新token
         String newToken = userService.refreshToken(token);
-        if (newToken == null) return CommonResult.failed("token已经过期");
-        Map<String, Object> map = new HashMap<>();
+        if (newToken == null) {
+            return CommonResult.failed("token已经过期");
+        }
+        Map<String, Object> map = new HashMap<>(5);
         map.put("token", newToken);
         map.put("tokenHead", tokenHead);
         return CommonResult.success(map);
@@ -70,8 +75,10 @@ public class UserController {
     public CommonResult login(@RequestParam("username") String username,
                               @RequestParam("password") String password) {
         String token = userService.login(username, password);
-        if (token == null) return CommonResult.validateFailed("用户名或密码错误");
-        Map<String, Object> map = new HashMap<>();
+        if (token == null) {
+            return CommonResult.validateFailed("用户名或密码错误");
+        }
+        Map<String, Object> map = new HashMap<>(5);
         map.put("token", token);
         map.put("tokenHead", tokenHead);
         return CommonResult.success(map);
@@ -86,14 +93,17 @@ public class UserController {
     @ApiOperation(value = "获取当前用户登录信息")
     @GetMapping("/info")
     public CommonResult getUserInfo(Principal principal) {
-        Map<String, Object> data = new HashMap<>();
+        Map<String, Object> data = new HashMap<>(5);
         String username = principal.getName();
         User user = userService.getUserByUsername(username);
         //获得用户权限用于前端判断不同用户的页面跳转
         List<Role> roleList = userRoleDao.getRolesByUserId(user.getId());
         for (Role r : roleList) {
-            if (r.getName().equals("ROLE_ADMIN")) data.put("role", "admin");
-            else data.put("role", "normal");
+            if ("ROLE_ADMIN".equals(r.getName())) {
+                data.put("role", "admin");
+            } else {
+                data.put("role", "normal");
+            }
         }
         //结果数据
         data.put("username", user.getUsername());
@@ -105,18 +115,26 @@ public class UserController {
     @PostMapping("/updatePassword")
     public CommonResult updatePwd(@RequestBody UpdatePasswordParam updatePasswordParam) {
         int status = userService.updatePassword(updatePasswordParam);
-        if (status > 0) return CommonResult.success(status);
-        else if (status == -1) return CommonResult.failed("提交参数不合法");
-        else if (status == -2) return CommonResult.failed("找不到该用户");
-        else if (status == -3) return CommonResult.failed("旧密码错误");
-        else return CommonResult.failed();
+        if (status > 0) {
+            return CommonResult.success(status);
+        } else if (status == -1) {
+            return CommonResult.failed("提交参数不合法");
+        } else if (status == -2) {
+            return CommonResult.failed("找不到该用户");
+        } else if (status == -3) {
+            return CommonResult.failed("旧密码错误");
+        } else {
+            return CommonResult.failed();
+        }
     }
 
     @ApiOperation(value = "修改当前用户信息")
     @PostMapping("/updateInfo/{id}")
     public CommonResult updateInfo(@PathVariable Integer id, @RequestBody User user) {
         int count = userService.updateInfo(id, user);
-        if (count > 0) return CommonResult.success(count);
+        if (count > 0) {
+            return CommonResult.success(count);
+        }
         return CommonResult.failed();
     }
 }

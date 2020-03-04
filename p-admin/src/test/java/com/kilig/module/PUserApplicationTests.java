@@ -33,6 +33,6 @@ class PUserApplicationTests {
 
     @Test
     public void getPwd() {
-        System.out.println(passwordEncoder.encode("admin"));
+        System.out.println(passwordEncoder.encode("test"));
     }
 }

@@ -53,7 +53,9 @@ public class UserServiceImpl implements UserService {
         UserExample example = new UserExample();
         example.createCriteria().andUsernameEqualTo(username);
         List<User> userList = userMapper.selectByExample(example);
-        if (userList != null && userList.size() > 0) return userList.get(0);
+        if (userList != null && userList.size() > 0) {
+            return userList.get(0);
+        }
         return null;
     }
 
@@ -66,7 +68,9 @@ public class UserServiceImpl implements UserService {
         UserExample example = new UserExample();
         example.createCriteria().andUsernameEqualTo(user.getUsername());
         List<User> userList = userMapper.selectByExample(example);
-        if (userList.size() > 0) return null;
+        if (userList.size() > 0) {
+            return null;
+        }
         //对密码进行加密
         String encodePwd = passwordEncoder.encode(user.getPassword());
         user.setPassword(encodePwd);
@@ -117,9 +121,13 @@ public class UserServiceImpl implements UserService {
         UserExample example = new UserExample();
         example.createCriteria().andUsernameEqualTo(param.getUsername());
         List<User> userList = userMapper.selectByExample(example);
-        if (CollUtil.isEmpty(userList)) return -2;
+        if (CollUtil.isEmpty(userList)) {
+            return -2;
+        }
         User user = userList.get(0);
-        if (!passwordEncoder.matches(param.getOldPassword(), user.getPassword())) return -3;
+        if (!passwordEncoder.matches(param.getOldPassword(), user.getPassword())) {
+            return -3;
+        }
         user.setPassword(passwordEncoder.encode(param.getNewPassword()));
         userMapper.updateByPrimaryKey(user);
         return 1;

@@ -4,7 +4,9 @@ import com.kilig.module.entity.UserRole;
 import com.kilig.module.entity.UserRoleExample;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface UserRoleMapper {
     long countByExample(UserRoleExample example);
 
