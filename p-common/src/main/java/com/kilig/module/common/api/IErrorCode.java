@@ -7,7 +7,17 @@ package com.kilig.module.common.api;
  * @date 2019/11/25
  */
 public interface IErrorCode {
+    /**
+     * 状态码
+     *
+     * @return
+     */
     long getCode();
 
+    /**
+     * 状态信息
+     *
+     * @return
+     */
     String getMessage();
 }

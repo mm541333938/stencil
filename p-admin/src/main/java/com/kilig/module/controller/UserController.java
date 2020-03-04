@@ -1,8 +1,10 @@
 package com.kilig.module.controller;
 
 import com.kilig.module.common.api.CommonResult;
+import com.kilig.module.constant.PwdStatusEnum;
 import com.kilig.module.dao.UserRoleDao;
 import com.kilig.module.dto.UpdatePasswordParam;
+import com.kilig.module.dto.UserLoginParam;
 import com.kilig.module.dto.UserRegisterParam;
 import com.kilig.module.entity.Role;
 import com.kilig.module.entity.User;
@@ -72,9 +74,8 @@ public class UserController {
 
     @ApiOperation(value = "用户登录")
     @PostMapping("/login")
-    public CommonResult login(@RequestParam("username") String username,
-                              @RequestParam("password") String password) {
-        String token = userService.login(username, password);
+    public CommonResult login(@RequestBody UserLoginParam userLoginParam, BindingResult result) {
+        String token = userService.login(userLoginParam.getUsername(), userLoginParam.getPassword());
         if (token == null) {
             return CommonResult.validateFailed("用户名或密码错误");
         }
@@ -115,13 +116,13 @@ public class UserController {
     @PostMapping("/updatePassword")
     public CommonResult updatePwd(@RequestBody UpdatePasswordParam updatePasswordParam) {
         int status = userService.updatePassword(updatePasswordParam);
-        if (status > 0) {
+        if (status > PwdStatusEnum.NORMAl_STATUS.getStatus()) {
             return CommonResult.success(status);
-        } else if (status == -1) {
+        } else if (status == PwdStatusEnum.PARAM_ILLEGAL.getStatus()) {
             return CommonResult.failed("提交参数不合法");
-        } else if (status == -2) {
+        } else if (status == PwdStatusEnum.NOT_USER.getStatus()) {
             return CommonResult.failed("找不到该用户");
-        } else if (status == -3) {
+        } else if (status == PwdStatusEnum.OLD_PWD_ERROR.getStatus()) {
             return CommonResult.failed("旧密码错误");
         } else {
             return CommonResult.failed();

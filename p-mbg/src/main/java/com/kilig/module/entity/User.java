@@ -1,6 +1,8 @@
 package com.kilig.module.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -10,7 +12,7 @@ public class User implements Serializable {
     private String username;
 
     private String password;
-
+    @JsonFormat(pattern = "yyyy-MM-dd HH-mm-ss")
     private Date createTime;
 
     private String email;
